@@ -111,7 +111,15 @@ Be sure to include the total marks in the format: [X Total Marks]
 
     import re
     m = re.search(r'\[(\d+) Total Marks\]', llm_response)
-    number = m.group(1)  # '85'
+    try:
+        if m:
+            number = m.group(1)  # '85'
+            number = int(number)
+        else:
+            number = 0
+    except:
+        number = 0
+
 
 
 
@@ -119,7 +127,8 @@ Be sure to include the total marks in the format: [X Total Marks]
 
     result.add_feedback(
         "general",
-        llm_response.choices[0].message.content,
+        # llm_response.choices[0].message.content,
+        llm_response,
     )
 
     return result
