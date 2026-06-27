@@ -33,7 +33,7 @@ def evaluation_function(
     to output the evaluation response.
     """
 
-    rubric_passed = params.get('rubric', 'missing rubric')
+    # rubric_passed = params.get('rubric', 'missing rubric')
 
     client = OpenAI(
         api_key=os.environ.get("OPENROUTER_API_KEY"),
@@ -88,7 +88,7 @@ What the student did well: Brief positive feedback.
 What the student needs to improve: Specific improvement advice, without giving away the answer.
 
 This is the rubric that should be used to evaluate the student answer:
-{rubric_passed}.
+.
 
 Be sure to include the total marks in the format: [X Total Marks]
     """
