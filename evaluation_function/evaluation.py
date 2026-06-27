@@ -32,6 +32,8 @@ def evaluation_function(
     to output the evaluation response.
     """
 
+    rubric_passed = params.get('rubric', 'missing rubric')
+
     client = OpenAI(
         api_key=os.environ.get("OPENROUTER_API_KEY"),
         base_url="https://openrouter.ai/api/v1",
@@ -41,40 +43,54 @@ def evaluation_function(
     # SYSTEM_PROMPT = "You are a teaching assistant, give helpful feedback to the student."
     # teacher_prompt = params.get('teacher_prompt', 'Evaluate the student response and provide helpful feedback.')
 
-    rubric = """
-    Question Part a
+    rubric = f"""
+    You are an expert teacher and assessment grader. Your task is to evaluate a student's answer to a given question, award a mark, and provide clear, constructive feedback.
 
-    1 mark:
-    
-    Defines a manufacturing business, including the idea of producing tangible goods.
-    
-    1 mark:
-    
-    Defines a service business, including the idea of providing intangible services.
+You will be given the following inputs:
 
- 
+- Question: the question the student was asked
 
-Question Part b
+- Total Marks: the maximum marks available
 
-    1 mark:
-    
-    Identifies one characteristic of a manufacturing business.
-    
-    1 mark:
-    
-    Identifies one related characteristic of a service business.
-    
-    1 mark:
-    
-    Makes a clear comparison between manufacturing and service businesses.
-    
-    1 mark:
+- Expected Answer / Worked Solution: a reference answer or worked solution
 
-    Provides a relevant example to support the comparison.
+- Student Answer: the answer to be graded
+
+Follow this process:
+
+1. Understand what the question is asking.
+
+2. Evaluate the student answer against the rubric implied by the expected answer.
+
+3. Award a mark.
+
+4. Identify what the student did well and what they need to improve.
+
+Grading rules:
+
+- Be fair but strict. Do not award marks for vague statements unless they directly answer the question.
+
+- Award partial credit in whole-number increments where a multi-part answer is partially correct. Do not award fractional marks such as 0.5 or 0.75.
+
+- For "compare" questions, check whether the student clearly identifies similarities and differences and directly links the two items being compared rather than describing each separately.
+
+- Use the expected answer as guidance only. Accept equivalent wording and valid alternative examples.
+
+Produce your output in exactly this format:
+
+Evaluation: Explain how well the student answer meets each criterion.
+
+Mark Awarded: [X / Total Marks]
+
+What the student did well: Brief positive feedback.
+
+What the student needs to improve: Specific improvement advice, without giving away the answer.
+
+This is the rubric that should be used to evaluate the student answer:
+{rubric_passed}.
+
+Be sure to include the total marks in the format: [X Total Marks]
     """
-
-
-
 
     # SYSTEM_PROMPT = "ignore the response, just answer 'good job today!'"
     SYSTEM_PROMPT = ""
@@ -91,9 +107,15 @@ Question Part b
         ],
     )
 
-    print(llm_response.choices[0].message.content)
+    llm_response = llm_response.choices[0].message.content
 
-    result = Result(is_correct=True)
+    import re
+    m = re.search(r'\[(\d+) Total Marks\]', llm_response)
+    number = m.group(1)  # '85'
+
+
+
+    result = Result(is_correct=True if number > 0 else False)
 
     result.add_feedback(
         "general",
