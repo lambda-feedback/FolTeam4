@@ -3,6 +3,7 @@ from typing import Any
 from lf_toolkit.evaluation import Result, Params
 from openai import OpenAI
 from dotenv import load_dotenv
+import re
 
 def evaluation_function(
     response: Any,
@@ -102,14 +103,14 @@ Be sure to include the total marks in the format: [X Total Marks]
     llm_response = client.chat.completions.create(
         model=params.get('model', 'openai/gpt-4o-mini'),
         messages=[
-            {"role": "system", "content": prompt},
+            {"role": "system", "content": rubric},
             {"role": "user", "content": response},
         ],
     )
 
     llm_response = llm_response.choices[0].message.content
 
-    import re
+
     m = re.search(r'\[(\d+) Total Marks\]', llm_response)
     try:
         if m:
